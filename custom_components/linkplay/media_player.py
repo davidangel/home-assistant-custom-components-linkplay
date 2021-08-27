@@ -518,26 +518,31 @@ class LinkPlayDevice(MediaPlayerEntity):
             if self._trackc:
                 attributes[ATTR_TRCRT] = self._trackc
 
+
         if self._upnp_device is None:
-            attributes[ATTR_DEBUG] = "UPnP not detected"
+            atrdbg = "UPnP not detected"
         else:
-            attributes[ATTR_DEBUG] = "UPnP detected"
+            atrdbg= "UPnP OK"
 
-#        if self._playing_localfile:
-#            attributes[ATTR_DEBUG] = "_playing_localfile"
+        if self._playing_localfile:
+            atrdbg = atrdbg + " _playing_localfile"
 
-#        elif self._playing_spotify:
-#            attributes[ATTR_DEBUG] = "_playing_spotify"
+        if self._playing_spotify:
+            atrdbg = atrdbg + " _playing_spotify"
 
-#        elif self._playing_webplaylist:
-#            attributes[ATTR_DEBUG] = "_playing_webplaylist"
+        if self._playing_webplaylist:
+            atrdbg = atrdbg + " _playing_webplaylist"
 
-#        elif self._playing_stream:
-#            attributes[ATTR_DEBUG] = "_playing_stream"
+        if self._playing_stream:
+            atrdbg = atrdbg + " _playing_stream"
 
-#        elif self._playing_liveinput:
-#            attributes[ATTR_DEBUG] = "_playing_liveinput"
+        if self._playing_liveinput:
+            atrdbg = atrdbg + " _playing_liveinput"
 
+        if self._playing_tts:
+            atrdbg = atrdbg + " _playing_tts"
+
+        attributes[ATTR_DEBUG] = atrdbg
         attributes[ATTR_FWVER] = self._fw_ver + "." + self._mcu_ver
 
         return attributes
@@ -750,6 +755,7 @@ class LinkPlayDevice(MediaPlayerEntity):
                     for slave in self._slave_list:
                         slave.set_state(self._state)
                         slave.set_position_updated_at(self.media_position_updated_at)
+                self.schedule_update_ha_state(True)
             else:
                 _LOGGER.warning("Failed to pause playback. Device: %s, Got response: %s", self.entity_id, value)
         else:
