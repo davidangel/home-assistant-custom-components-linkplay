@@ -37,8 +37,8 @@ from homeassistant.const import (
     STATE_UNAVAILABLE,
 )
 from homeassistant.components.media_player import (
-    DEVICE_CLASS_SPEAKER, 
-    BrowseMedia, 
+    DEVICE_CLASS_SPEAKER,
+    BrowseMedia,
     MediaPlayerEntity,
 )
 from homeassistant.components.media_player.const import (
@@ -97,6 +97,7 @@ CONF_MULTIROOM_WIFIDIRECT = 'multiroom_wifidirect'
 CONF_VOLUME_STEP = 'volume_step'
 CONF_LEDOFF = 'led_off'
 
+DEBUGSTR_ATTR = False
 LASTFM_API_BASE = 'http://ws.audioscrobbler.com/2.0/?method='
 MAX_VOL = 100
 FW_MROOM_RTR_MIN = '4.2.8020'
@@ -109,6 +110,7 @@ MROOM_UJWDIR = timedelta(seconds=20)
 MROOM_UJWROU = timedelta(seconds=3)
 ROOTDIR_USB = '/media/sda1/'
 UUID_ARYLIC = 'FF31F09E'
+
 
 DEFAULT_ICECAST_UPDATE = 'StationName'
 DEFAULT_MULTIROOM_WIFIDIRECT = False
@@ -460,11 +462,8 @@ class LinkPlayDevice(MediaPlayerEntity):
 
     @property
     def media_content_type(self):
-        """Content type of current playing media."""
-        if self._playing_stream:
-            return MEDIA_TYPE_URL
-        else:
-            return MEDIA_TYPE_MUSIC
+        """Content type of current playing media. Has to be MEDIA_TYPE_MUSIC in order for Lovelace to show both artist and title."""
+        return MEDIA_TYPE_MUSIC
 
     @property
     def ssid(self):
@@ -519,30 +518,32 @@ class LinkPlayDevice(MediaPlayerEntity):
                 attributes[ATTR_TRCRT] = self._trackc
 
 
-        if self._upnp_device is None:
-            atrdbg = "UPnP not detected"
-        else:
-            atrdbg= "UPnP OK"
+        if DEBUGSTR_ATTR:
+            if self._upnp_device is None:
+                atrdbg = "UPnP not detected"
+            else:
+                atrdbg= "UPnP detected"
 
-        if self._playing_localfile:
-            atrdbg = atrdbg + " _playing_localfile"
+            if self._playing_localfile:
+                atrdbg = atrdbg + " _playing_localfile"
 
-        if self._playing_spotify:
-            atrdbg = atrdbg + " _playing_spotify"
+            if self._playing_spotify:
+                atrdbg = atrdbg + " _playing_spotify"
 
-        if self._playing_webplaylist:
-            atrdbg = atrdbg + " _playing_webplaylist"
+            if self._playing_webplaylist:
+                atrdbg = atrdbg + " _playing_webplaylist"
 
-        if self._playing_stream:
-            atrdbg = atrdbg + " _playing_stream"
+            if self._playing_stream:
+                atrdbg = atrdbg + " _playing_stream"
 
-        if self._playing_liveinput:
-            atrdbg = atrdbg + " _playing_liveinput"
+            if self._playing_liveinput:
+                atrdbg = atrdbg + " _playing_liveinput"
 
-        if self._playing_tts:
-            atrdbg = atrdbg + " _playing_tts"
+            if self._playing_tts:
+                atrdbg = atrdbg + " _playing_tts"
 
-        attributes[ATTR_DEBUG] = atrdbg
+            attributes[ATTR_DEBUG] = atrdbg
+
         attributes[ATTR_FWVER] = self._fw_ver + "." + self._mcu_ver
 
         return attributes
@@ -755,7 +756,7 @@ class LinkPlayDevice(MediaPlayerEntity):
                     for slave in self._slave_list:
                         slave.set_state(self._state)
                         slave.set_position_updated_at(self.media_position_updated_at)
-                self.schedule_update_ha_state(True)
+#                self.schedule_update_ha_state(True)
             else:
                 _LOGGER.warning("Failed to pause playback. Device: %s, Got response: %s", self.entity_id, value)
         else:
@@ -2149,7 +2150,7 @@ class LinkPlayDevice(MediaPlayerEntity):
             else:
                 self._source = 'Web playlist'
 
-            if self._source != 'Network' and not (self._playing_stream or self._playing_localfile):
+            if self._source != 'Network' and not (self._playing_stream or self._playing_localfile or self._playing_spotify):
                 if self._source == 'Idle':
                     self._media_title = None
                     self._state = STATE_IDLE
