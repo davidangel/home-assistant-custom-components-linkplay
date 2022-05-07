@@ -425,12 +425,12 @@ There are quite a few manufacturers and devices that operate on the basis of Lin
 - **Zolo Audio** (Holo),
 - etc.
 
-## Home Assisnatnt component authors & contributors
+## Home Assistant component authors & contributors
     "@nicjo814",
     "@limych",
     "@nagyrobi"
 
-## Home Assisnatnt component License
+## Home Assistant component License
 
 MIT License
 
